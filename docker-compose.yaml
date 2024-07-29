@@ -1,0 +1,11 @@
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+      target: development
+    command: pnpm run start:dev auth
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
