@@ -1,12 +1,14 @@
 FROM node:alpine as development
 
 WORKDIR /usr/src/app
+# WORKDIR /app
 
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 RUN npm install -g pnpm
-
+RUN npm install -g @nestjs/cli
+# RUN pnpm add -g @nestjs/cli
 RUN pnpm install
 
 COPY . .
@@ -25,6 +27,8 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 RUN npm install -g pnpm
+RUN npm install -g @nestjs/cli
+# RUN pnpm add -g @nestjs/cli
 RUN pnpm install --prod
 
 COPY --from=development /usr/src/app/dist ./dist
