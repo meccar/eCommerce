@@ -1,17 +1,25 @@
 import { Module } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
-import { DBModule, LoggerModule } from "@app/common";
-import { AuthRepository } from "./auth.repository";
-import { AuthDocument, AuthSchema } from "./models/auth.schema";
+import { LoggerModule } from "@app/common";
+import { UsersModule } from "./users/users.module";
+import { JwtModule } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 
 @Module({
   imports: [
-    DBModule,
-    DBModule.forFeature([{ name: AuthDocument.name, schema: AuthSchema }]),
+    UsersModule,
     LoggerModule,
+    JwtModule.registerAsync({
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>("JWT_SECRET"),
+        signOptions: {
+          expiresIn: `${configService.get("JWT_EXPIRATION")}s`,
+        },
+      }),
+    }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository],
+  providers: [AuthService],
 })
 export class AuthModule {}

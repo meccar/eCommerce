@@ -8,7 +8,7 @@ import {
 import { Match } from "./match.decorator";
 import { Type } from "class-transformer";
 
-export class CreateAuthDto {
+export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   username: string;
