@@ -1,39 +1,33 @@
 import { Injectable } from "@nestjs/common";
-import { CreateAuthDto } from "./dto/createUser.dto";
-import { UpdateAuthDto } from "./dto/updateUser.dto";
-import { AuthRepository } from "./dto/user.repository";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { Response } from "express";
+
+import { UserDocument } from "./models/user.schema";
+import { TokenPayload } from "./interfaces/tokenPayload.interface";
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly authRepository: AuthRepository) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService
+  ) {}
 
-  create(createAuthDto: CreateAuthDto) {
-    return this.authRepository.create({
-      ...createAuthDto,
-      username: "string",
-      email: "string",
-      password: "string",
-      passwordConfirm: "string",
-      startDate: new Date(),
-    });
-  }
+  async login(user: UserDocument, response: Response) {
+    const tokenPayload: TokenPayload = {
+      userID: user._id.toHexString(),
+    };
 
-  findAll() {
-    return this.authRepository.find({});
-  }
-
-  findOne(_id: string) {
-    return this.authRepository.findOne({ _id });
-  }
-
-  update(_id: string, updateAuthDto: UpdateAuthDto) {
-    return this.authRepository.findOneAndUpdate(
-      { _id },
-      { $set: updateAuthDto }
+    const expires = new Date();
+    expires.setSeconds(
+      expires.getSeconds() + this.configService.get("JWT_EXPIRATION")
     );
-  }
 
-  remove(_id: string) {
-    return this.authRepository.findOneAndDelete({ _id });
+    const token = this.jwtService.sign(tokenPayload);
+
+    response.cookie("Authentication", token, {
+      httpOnly: true,
+      expires,
+    });
   }
 }
